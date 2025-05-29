@@ -48,10 +48,10 @@ $Params = @{
     ApplicationID ="af89894e-e9ac-495b-b120-476fc370e7cf"
     TenantID = "b5976420-83ee-4ae8-b567-aa3d16095d7a"
     ClientSecret = $ApplicationAccountCreds.getnetworkcredential().password
-    SolutionPath      = "C:\Users\Brendan\Desktop\Projects\Date Generator\DateGenerator\DateGenerator_managed.zip"
-    SettingsFilePath  = "C:\Users\Brendan\Desktop\Projects\Date Generator\DateGenerator\DateGenerator_settings_TestEnv.json"
-    ConnectionName    = "PowerFxHelpTest"
-    EnvironmentURL    = "https://orge5f6a53a.crm.dynamics.com//"
+    SolutionPath      = "D:\Documents\Projects\DateGenerator\deployment\DateGenerator_managed.zip"
+    SettingsFilePath  = "D:\Documents\Projects\DateGenerator\deployment\DateGenerator_settings_Test.json"
+    ConnectionName    = "PL400-TestEnvironment"
+    EnvironmentURL    = "https://org29b7ab4a.crm.dynamics.com/"
 }
 
 Import-PowerPlatformSolution @Params
