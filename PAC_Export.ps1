@@ -44,6 +44,8 @@ function Export-PowerPlatformSolution {
 
         $FilteredSolutions = $Solutions | Where-Object {$_.SolutionUniqueName -eq $SolutionName}
 
+        $Version  = $FilteredSolutions.VersionNumber.Replace(".","_")
+
         If($FilteredSolutions){
 
         Write-Host "Found Solution $($SolutionName) in environment"
@@ -51,11 +53,23 @@ function Export-PowerPlatformSolution {
         # Export
         pac solution export --name $SolutionName --path $ManagedPath --managed --overwrite
         pac solution export --name $SolutionName --path $UnmangedPath --managed false --overwrite
+
         # Settings File
         if ($UseSettingsFile -and !$OverrideSettingFile) {
             pac solution create-settings --solution-zip $ManagedPath --settings-file $SettingsFileName
         }
 
+        # Rename files to append the version number onto them
+
+        $Files = Get-ChildItem -Path $ExportPath -File -Filter "*.zip"
+
+        $Files | ForEach-Object {
+
+            $NewFileName = $_.BaseName + "_" + $Version + $_.Extension
+
+          Rename-Item $_.FullName -NewName $NewFileName
+
+        }
 
         } else {
 
@@ -70,7 +84,7 @@ function Export-PowerPlatformSolution {
 # Params
 
 $CurrentPath = $(Resolve-Path  -Path .\SolutionExports).Path
-$SolutionName  = "PowerUpFinalAppChallenge"
+$SolutionName  = "BarcodeScanSample"
 
 $Params = @{
     ExportPath = $(Join-Path $CurrentPath -ChildPath $SolutionName)
@@ -81,4 +95,3 @@ $Params = @{
 }
 
 Export-PowerPlatformSolution @Params
-
