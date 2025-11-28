@@ -69,12 +69,16 @@ function Export-PowerPlatformSolution {
 
 # Params
 
+$CurrentPath = $(Resolve-Path  -Path .\SolutionExports).Path
+$SolutionName  = "PowerUpFinalAppChallenge"
+
 $Params = @{
-    ExportPath = "C:\Users\Brendan\Desktop\Projects\PowerUpProgram\FinalApp\Scripts"
-    SolutionName = "PowerUpFinalAppChallenge"
+    ExportPath = $(Join-Path $CurrentPath -ChildPath $SolutionName)
+    SolutionName = $SolutionName
     ConnectionName = "PowerFxHelpDev"
     EnvironmentURL =  "https://org403dacb8.crm.dynamics.com/"
     UseSettingsFile = $true
 }
 
 Export-PowerPlatformSolution @Params
+
