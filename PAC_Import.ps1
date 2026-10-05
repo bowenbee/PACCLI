@@ -48,10 +48,10 @@ $Params = @{
     ApplicationID ="af89894e-e9ac-495b-b120-476fc370e7cf"
     TenantID = "b5976420-83ee-4ae8-b567-aa3d16095d7a"
     ClientSecret = $ApplicationAccountCreds.getnetworkcredential().password
-    SolutionPath      = "D:\Documents\Projects\DateGenerator\deployment\DateGenerator_managed.zip"
-    SettingsFilePath  = "D:\Documents\Projects\DateGenerator\deployment\DateGenerator_settings_Test.json"
-    ConnectionName    = "PL400-TestEnvironment"
-    EnvironmentURL    = "https://org29b7ab4a.crm.dynamics.com/"
+    SolutionPath      = "D:\Documents\Projects\EisenhowerMatrix\EisenhowerMatrix_1_0_0_1_managed.zip"
+    SettingsFilePath  = "D:\Documents\Projects\EisenhowerMatrix\EisenhowerMatrix_settings.json"
+    ConnectionName    = "Default_Environment"
+    EnvironmentURL    = "https://org3842dc2f.crm.dynamics.com/"
 }
 
 Import-PowerPlatformSolution @Params
