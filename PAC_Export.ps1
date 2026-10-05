@@ -27,7 +27,7 @@ function Export-PowerPlatformSolution {
         }
 
         if ($ExistingSettingsFile) {
-            $userResponse = Read-Host "The settings file already exists. Do you want to override it? (Y/N)"
+            $userResponse = Read-Host "The settings file already exists for $($SolutionName). Do you want to override it? (Y/N)"
             if ($userResponse -eq 'Y' -or $userResponse -eq 'y') {
                 $OverrideSettingFile = $true
             } else {
@@ -36,7 +36,8 @@ function Export-PowerPlatformSolution {
         }
 
         # Connection
-        pac auth create --name $ConnectionName --environment $EnvironmentURL
+
+       # pac auth create --name $ConnectionName --environment $EnvironmentURL
 
         # List Solutions
 
@@ -54,8 +55,9 @@ function Export-PowerPlatformSolution {
         pac solution export --name $SolutionName --path $ManagedPath --managed --overwrite
         pac solution export --name $SolutionName --path $UnmangedPath --managed false --overwrite
 
-        # Settings File
-        if ($UseSettingsFile -and !$OverrideSettingFile) {
+        # Settings File (create when missing, or replace when the user agreed to override)
+        if ($UseSettingsFile -and (!$ExistingSettingsFile -or $OverrideSettingFile)) {
+            if ($ExistingSettingsFile) { Remove-Item $SettingsFileName }
             pac solution create-settings --solution-zip $ManagedPath --settings-file $SettingsFileName
         }
 
@@ -81,17 +83,39 @@ function Export-PowerPlatformSolution {
     }
 }
 
-# Params
+$SolutionName = "EisenhowerMatrix"
+$ExportPath = "D:\Documents\Projects\EisenhowerMatrix"
+$SolutionUnpackExportPath = "$ExportPath\solution"
+$UnmanagedZip = Join-Path $ExportPath "$($SolutionName).zip"
+$ManagedZip   = Join-Path $ExportPath "$($SolutionName)_managed.zip"
+$SettingsFile = Join-Path $ExportPath "$($SolutionName)_settings.json"
 
-$CurrentPath = $(Resolve-Path  -Path .\SolutionExports).Path
-$SolutionName  = "BarcodeScanSample"
+pac solution export --name $SolutionName --path $UnmanagedZip --overwrite
+pac solution export --name $SolutionName --path $ManagedZip --managed --overwrite
 
-$Params = @{
-    ExportPath = $(Join-Path $CurrentPath -ChildPath $SolutionName)
-    SolutionName = $SolutionName
-    ConnectionName = "PowerFxHelpDev"
-    EnvironmentURL =  "https://org403dacb8.crm.dynamics.com/"
-    UseSettingsFile = $true
+# Deployment settings (environment variables + connection references) from the managed zip
+$CreateSettingsFile = $true
+if (Test-Path $SettingsFile) {
+    $userResponse = Read-Host "The settings file already exists for $($SolutionName). Do you want to override it? (Y/N)"
+    $CreateSettingsFile = $userResponse -eq 'Y' -or $userResponse -eq 'y'
 }
 
-Export-PowerPlatformSolution @Params
+if ($CreateSettingsFile) {
+    if (Test-Path $SettingsFile) { Remove-Item $SettingsFile }
+    pac solution create-settings --solution-zip $ManagedZip --settings-file $SettingsFile
+} else {
+    Write-Host "Keeping existing settings file: $SettingsFile"
+}
+
+# Unpack the unmanaged zip into .\solution
+#   --allowDelete removes files from .\solution that are no longer in the solution
+#   --processCanvasApps expands the .msapp into source files so app changes show as diffs in git
+pac solution unpack --zipfile $UnmanagedZip --folder $SolutionUnpackExportPath --packagetype Unmanaged --allowWrite true --allowDelete true --processCanvasApps true
+
+ pac solution pack --zipfile "$ExportPath\EisenhowerMatrix.zip" --folder "$ExportPath"
+
+ pac solution import --path "$ExportPath\EisenhowerMatrix.zip" --publish-changes
+
+ pac solution pack --zipfile "$ExportPath\PokemonEncyclopedia.zip" --folder "$ExportPath"
+
+ pac solution import --path "$ExportPath\PokemonEncyclopedia.zip" --publish-changes
